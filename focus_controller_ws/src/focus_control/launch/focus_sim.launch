@@ -1,0 +1,17 @@
+<launch>
+
+<!-- Controllers -->
+
+	<node pkg="focus_control" type="longitudinal_controller" name="longitudinal_controller" output="screen">
+	</node>
+
+	<node pkg="focus_control" type="lateral_controller" name="lateral_controller" output="screen">
+	</node>
+
+	<node pkg="focus_control" type="simulator.py" name="simulator" output="screen">
+	</node>
+
+	<node pkg="focus_control" type="desired_input.py" name="desired_input" output="screen">
+	</node>
+
+</launch>

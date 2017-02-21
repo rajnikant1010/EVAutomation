@@ -1,0 +1,13 @@
+pub_rate: 1.0
+analyzers:
+  GPS:
+    type: diagnostic_aggregator/GenericAnalyzer
+    path: 'GPS'
+    timeout: 5.0
+    contains: ['piksi_']
+
+ CAN:
+	type: diagnostic_aggregator/GenericAnalyzer
+	path: 'CAN'
+	timeout: 5.0
+	contains: ['CAN']
