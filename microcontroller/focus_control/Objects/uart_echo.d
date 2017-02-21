@@ -1,0 +1,13 @@
+.\objects\uart_echo.o: uart_echo.cpp
+.\objects\uart_echo.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\uart_echo.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
+.\objects\uart_echo.o: C:\ti\TivaWare_C_Series-2.1.2.111\inc/hw_ints.h
+.\objects\uart_echo.o: C:\ti\TivaWare_C_Series-2.1.2.111\inc/hw_memmap.h
+.\objects\uart_echo.o: C:\ti\TivaWare_C_Series-2.1.2.111\driverlib/debug.h
+.\objects\uart_echo.o: C:\ti\TivaWare_C_Series-2.1.2.111\driverlib/gpio.h
+.\objects\uart_echo.o: C:\ti\TivaWare_C_Series-2.1.2.111\driverlib/interrupt.h
+.\objects\uart_echo.o: C:\ti\TivaWare_C_Series-2.1.2.111\driverlib/pin_map.h
+.\objects\uart_echo.o: C:\ti\TivaWare_C_Series-2.1.2.111\driverlib/rom.h
+.\objects\uart_echo.o: C:\ti\TivaWare_C_Series-2.1.2.111\driverlib/rom_map.h
+.\objects\uart_echo.o: C:\ti\TivaWare_C_Series-2.1.2.111\driverlib/sysctl.h
+.\objects\uart_echo.o: C:\ti\TivaWare_C_Series-2.1.2.111\driverlib/uart.h

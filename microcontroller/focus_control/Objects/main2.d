@@ -1,0 +1,13 @@
+.\objects\main2.o: main2.c
+.\objects\main2.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\main2.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
+.\objects\main2.o: C:\ti\TivaWare_C_Series-2.1.2.111\inc/hw_ints.h
+.\objects\main2.o: C:\ti\TivaWare_C_Series-2.1.2.111\inc/hw_memmap.h
+.\objects\main2.o: C:\ti\TivaWare_C_Series-2.1.2.111\driverlib/debug.h
+.\objects\main2.o: C:\ti\TivaWare_C_Series-2.1.2.111\driverlib/gpio.h
+.\objects\main2.o: C:\ti\TivaWare_C_Series-2.1.2.111\driverlib/interrupt.h
+.\objects\main2.o: C:\ti\TivaWare_C_Series-2.1.2.111\driverlib/pin_map.h
+.\objects\main2.o: C:\ti\TivaWare_C_Series-2.1.2.111\driverlib/rom.h
+.\objects\main2.o: C:\ti\TivaWare_C_Series-2.1.2.111\driverlib/rom_map.h
+.\objects\main2.o: C:\ti\TivaWare_C_Series-2.1.2.111\driverlib/sysctl.h
+.\objects\main2.o: C:\ti\TivaWare_C_Series-2.1.2.111\driverlib/uart.h
