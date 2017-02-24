@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="focus_lane_detection" />
+		<Option makefile_is_custom="1" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<MakeCommands>
+			<Build command="$make debug" />
+			<CompileFile command="$make debug" />
+			<Clean command="$make clean" />
+			<DistClean command="$make -f $makefile distclean$target" />
+			<AskRebuildNeeded command="$make -q -f $makefile $target" />
+			<SilentBuild command="$make debug &gt; $(CMD_NULL)" />
+		</MakeCommands>
+		<Build>
+			<Target title="Debug">
+				<Option output="LaneDetector64" prefix_auto="1" extension_auto="1" />
+				<Option object_output="/home/chasekunz/Desktop/caltech_playground/cb_caltech-lane_detection_focus/.objs" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option parameters="--show --save-lanes --wait=50 --lanes-conf=Lanes.conf --camera-conf=CameraInfo.conf --list-file=../clips/focus/list.txt --list-path=../clips/focus/ --output-suffix=_results" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+				<MakeCommands>
+					<Build command="$make debug" />
+					<CompileFile command="$make debug" />
+					<Clean command="$make clean" />
+					<DistClean command="$make -f $makefile distclean$target" />
+					<AskRebuildNeeded command="$make -q -f $makefile $target" />
+					<SilentBuild command="$make debug &gt; $(CMD_NULL)" />
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="CameraInfo.conf" />
+		<Unit filename="CameraInfoOpt.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="CameraInfoOpt.ggo" />
+		<Unit filename="CameraInfoOpt.h" />
+		<Unit filename="CameraInfoOpt.o" />
+		<Unit filename="InversePerspectiveMapping.cc" />
+		<Unit filename="InversePerspectiveMapping.hh" />
+		<Unit filename="InversePerspectiveMapping.o" />
+		<Unit filename="LaneDetector.cc" />
+		<Unit filename="LaneDetector.hh" />
+		<Unit filename="LaneDetector.o" />
+		<Unit filename="LaneDetector32" />
+		<Unit filename="LaneDetector64" />
+		<Unit filename="LaneDetectorOpt.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="LaneDetectorOpt.ggo" />
+		<Unit filename="LaneDetectorOpt.h" />
+		<Unit filename="LaneDetectorOpt.o" />
+		<Unit filename="Lanes-mode2.conf" />
+		<Unit filename="Lanes.conf" />
+		<Unit filename="Makefile" />
+		<Unit filename="Stoplines.conf" />
+		<Unit filename="cmdline.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="cmdline.ggo" />
+		<Unit filename="cmdline.h" />
+		<Unit filename="cmdline.o" />
+		<Unit filename="main.cc" />
+		<Unit filename="main.hh" />
+		<Unit filename="main.o" />
+		<Unit filename="mcv.cc" />
+		<Unit filename="mcv.hh" />
+		<Unit filename="mcv.o" />
+		<Unit filename="ranker.h" />
+		<Unit filename="run.sh" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
