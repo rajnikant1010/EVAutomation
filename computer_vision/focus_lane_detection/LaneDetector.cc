@@ -1506,21 +1506,6 @@ void mcvGetLanes(const CvMat *inImage, const CvMat* clrImage,
   LineState newState;
   if(!state) state = &newState;
 
-//     //get the IPM size such that we have height of the stop line
-//     //is 3 pixels
-//     double ipmWidth, ipmHeight;
-//     mcvGetIPMExtent(cameraInfo, &ipmInfo);
-//     ipmHeight = 3*(ipmInfo.yLimits[1]-ipmInfo.yLimits[0]) / (stopLineConf->lineHeight/3.);
-//     ipmWidth = ipmHeight * 4/3;
-//     //put into the conf
-//     stopLineConf->ipmWidth = int(ipmWidth);
-//     stopLineConf->ipmHeight = int(ipmHeight);
-
-//     #ifdef DEBUG_GET_STOP_LINES
-//     cout << "IPM width:" << stopLineConf->ipmWidth << " IPM height:"
-// 	 << stopLineConf->ipmHeight << "\n";
-//     #endif
-
 
   //Get IPM
   CvSize ipmSize = cvSize((int)stopLineConf->ipmWidth,
@@ -1538,20 +1523,8 @@ void mcvGetLanes(const CvMat *inImage, const CvMat* clrImage,
   list<CvPoint>::iterator outPixelsi;
   mcvGetIPM(image, ipm, &ipmInfo, cameraInfo, &outPixels);
 
-  //smooth the IPM image with 5x5 gaussian filter
-#warning "Check: Smoothing IPM image"
-  //cvSmooth(ipm, ipm, CV_GAUSSIAN, 3);
-  //      SHOW_MAT(ipm, "ipm");
-
-  //     //subtract mean
-  //     CvScalar mean = cvAvg(ipm);
-  //     cvSubS(ipm, mean, ipm);
-
   //keep copy
   CvMat* rawipm = cvCloneMat(ipm);
-
-  //smooth the IPM
-  //cvSmooth(ipm, ipm, CV_GAUSSIAN, 5, 5, 1, 1);
 
   //debugging
   CvMat *dbIpmImage;
@@ -1569,30 +1542,13 @@ void mcvGetLanes(const CvMat *inImage, const CvMat* clrImage,
   //stop line pixel height: 12 inches = 12*25.4 mm
   FLOAT stopLinePixelHeight = stopLineConf->lineHeight  *
       ipmInfo.yScale;
-  //kernel dimensions
-  //unsigned char wx = 2;
-  //unsigned char wy = 2;
   FLOAT sigmax = stopLinePixelWidth;
   FLOAT sigmay = stopLinePixelHeight;
-
-//     //filter in the horizontal direction
-//     CvMat * ipmt = cvCreateMat(ipm->width, ipm->height, ipm->type);
-//     cvTranspose(ipm, ipmt);
-//     mcvFilterLines(ipmt, ipmt, stopLineConf->kernelWidth,
-// 		   stopLineConf->kernelHeight, sigmax, sigmay,
-// 		   LINE_VERTICAL);
-//     //retranspose
-//     CvMat *ipm2 = cvCreateMat(ipm->height, ipm->width, ipm->type);
-//     cvTranspose(ipmt, ipm2);
-//     cvReleaseMat(&ipmt);
 
   //filter the IPM image
   mcvFilterLines(ipm, ipm, stopLineConf->kernelWidth,
                  stopLineConf->kernelHeight, sigmax, sigmay,
                  LINE_VERTICAL);
-//     mcvFilterLines(ipm, ipm, stopLineConf->kernelWidth,
-// 		   stopLineConf->kernelHeight, sigmax, sigmay,
-// 		   LINE_VERTICAL);
 
   //zero out points outside the image in IPM view
   for(outPixelsi=outPixels.begin(); outPixelsi!=outPixels.end(); outPixelsi++)
@@ -1619,25 +1575,10 @@ void mcvGetLanes(const CvMat *inImage, const CvMat* clrImage,
     SHOW_IMAGE(ipm, "Lane unthresholded filtered", 10);
   }
 
-  //take the negative to get double yellow lines
-  //cvScale(ipm, ipm, -1);
-
   CvMat *fipm = cvCloneMat(ipm);
 
-    //zero out negative values
-//     SHOW_MAT(fipm, "fipm");
 #warning "clean negative parts in filtered image"
   mcvThresholdLower(ipm, ipm, 0);
-//     mcvThresholdLower(ipm2, ipm2, 0);
-
-//     //add the two images
-//     cvAdd(ipm, ipm2, ipm);
-
-//     //clear the horizontal filtered image
-//     cvReleaseMat(&ipm2);
-
-  //fipm was here
-  //make copy of filteed ipm image
 
   vector <Line> dbIpmStopLines;
   vector<Spline> dbIpmSplines;
@@ -1660,22 +1601,11 @@ void mcvGetLanes(const CvMat *inImage, const CvMat* clrImage,
     //compute quantile: .985
     FLOAT qtileThreshold = mcvGetQuantile(subimage, stopLineConf->lowerQuantile);
     mcvThresholdLower(subimage, subimage, qtileThreshold);
-  // 	FLOAT qtileThreshold = mcvGetQuantile(ipm, stopLineConf->lowerQuantile);
-  // 	mcvThresholdLower(ipm, ipm, qtileThreshold);
 
-  //     qtileThreshold = mcvGetQuantile(ipm2, stopLineConf->lowerQuantile);
-  //     mcvThresholdLower(ipm2, ipm2, qtileThreshold);
-
-      //and fipm was here last
-  //     //make copy of filtered ipm image
-  //     CvMat *fipm = cvCloneMat(ipm);
     vector<Line> subimageLines;
     vector<Spline> subimageSplines;
     vector<float> subimageLineScores, subimageSplineScores;
 
-	//check to blank out other periferi of the image
-// 	mask = cvRect(40, 0, 80, subimage->height);
-// 	mcvSetMat(subimage, mask, 0);
     if(DEBUG_LINES || DEBUG_THRESHOLDED) {//#ifdef DEBUG_GET_STOP_LINES
 	    CvMat *dbIpmImageThresholded;
 	    dbIpmImageThresholded = cvCreateMat(ipm->height, ipm->width, ipm->type);
@@ -1691,9 +1621,7 @@ void mcvGetLanes(const CvMat *inImage, const CvMat* clrImage,
     mcvGetLines(subimage, LINE_VERTICAL, subimageLines, subimageLineScores,
 		    subimageSplines, subimageSplineScores, stopLineConf,
 		    state);
-// 	mcvGetLines(ipm, LINE_VERTICAL, *lanes, *lineScores,
-// 		    *splines, *splineScores, stopLineConf,
-// 		    state);
+
     //put back
     for (unsigned int k=0; k<subimageLines.size(); k++)
     {
@@ -1721,15 +1649,6 @@ void mcvGetLanes(const CvMat *inImage, const CvMat* clrImage,
 	    //thresholded ipm
 	    SHOW_IMAGE(dbIpmImageThresholded, str, 10);
 	    cvReleaseMat(&dbIpmImageThresholded);
-
-	    //dbIpmStopLines = *lanes;
-	    //dbIpmSplines = *splines;
-	    // 	//print out lineScores
-	    // 	cout << "LineScores:";
-	    // 	//for (int i=0; i<(int)lineScores->size(); i++)
-	    // 	for (int i=0; i<(int)lineScores->size(); i++)
-	    // 	    cout << (*lineScores)[i] << " ";
-	    // 	cout << "\n";
     }//#endif
 
     //release
