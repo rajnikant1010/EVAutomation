@@ -1746,14 +1746,6 @@ void mcvPostprocessLines(const CvMat* image, const CvMat* clrImage,
   vector<Spline> keepSplines;
   vector<float> keepSplineScores;
 
-//     //get line extent
-//     if(lineConf->getEndPoints)
-//     {
-// 	//get line extent in IPM image
-// 	for(int i=0; i<(int)lines.size(); i++)
-// 	    mcvGetLineExtent(rawipm, lines[i], lines[i]);
-//     }
-
   //if return straight lines
 
   if (lineConf->ransacLine || !lineConf->ransacSpline)
@@ -1809,74 +1801,12 @@ void mcvPostprocessLines(const CvMat* image, const CvMat* clrImage,
         //refit spline
         Spline spline = mcvFitBezierSpline(p, lineConf->ransacSplineDegree);
 
-
         // **** investigating ipm points, especially blank space ****
         // **** at bottom of ipm transformed spline              ****
-        // Show new points vs old points
-            //get string
-//        char str[256];
-//        sprintf(str, "Old Points");
-//
-//        CvMat *oldPoints;
-//
-//        //convert image to rgb
-//        oldPoints = cvCreateMat(fipm->rows, fipm->cols, CV_32FC3);
-//        CvMat *im2 = cvCloneMat(fipm);
-//        mcvScaleMat(fipm, im2);
-//        cvCvtColor(im2, oldPoints, CV_GRAY2RGB);
-//        cvReleaseMat(&im2);
-//
-//        //show original points
-//        for(int i=0; i<points->height; i++)
-//            //input points
-//            cvCircle(oldPoints, cvPoint((int)(CV_MAT_ELEM(*points, float, i, 0)),
-//                                       (int)(CV_MAT_ELEM(*points, float, i, 1))),
-//                     1, CV_RGB(0, 1, 1), -1);
-//
-//        //show new points
-//        for(int i=0; i<p->height; i++)
-//            //input points
-//            cvCircle(oldPoints, cvPoint((int)(CV_MAT_ELEM(*p, float, i, 0)),
-//                                       (int)(CV_MAT_ELEM(*p, float, i, 1))),
-//                     1, CV_RGB(1, 1, 0), -1);
-//
-//        mcvDrawSpline(oldPoints, splines[i], CV_RGB(0, 1, 1), 1);
-//        mcvDrawSpline(oldPoints, spline, CV_RGB(1, 1, 0), 1);
-//        //show image
-//        SHOW_IMAGE(oldPoints, str, 10);
-//
-//        //Compare with color image
-//        CvMat *clr2 = cvCloneMat(clrImage);
-//
-//        //
-//
-//        vector<Spline> dbSplines;
-//        dbSplines.push_back(spline);
-//
-//        //convert to image coordinates
-//        mcvSplinesImIPM2Im(dbSplines, ipmInfo, cameraInfo, inSize);
-//        mcvSplinesImIPM2Im(splines, ipmInfo, cameraInfo, inSize);
-//
-//        // draw
-//        mcvDrawSpline(clr2, splines[i], CV_RGB(0, 255, 255), 2);
-//        mcvDrawSpline(clr2, dbSplines[0], CV_RGB(255, 255, 0), 2);
-//
-//        sprintf(str, "Spline conversion");
-//        SHOW_IMAGE(clr2, str, 10);
-//        cvWaitKey(0);
-
-        // **** investigating ipm points, especially blank space ****
-        // **** at bottom of ipm transformed spline              ****
-
 
 		//save
 #warning "Check this later: extension in IPM. Check threshold value"
  		splines[i] = spline;
-
-		//calculate the score from fipm or ipm (thresholded)
-		//float lengthRatio = 0.5; //.8
-		//float angleRatio = 0.8; //.4
-		//vector<int> jitter = mcvGetJitterVector(lineConf->splineScoreJitter);//2);
 
         float score = mcvGetSplineScore(fipm, splines[i],
                                         lineConf->splineScoreStep, //.1
@@ -1900,6 +1830,29 @@ void mcvPostprocessLines(const CvMat* image, const CvMat* clrImage,
         cvReleaseMat(&p);
       } //if
     } //for
+
+    // keep top two splines
+    if(keepSplines.size() > 2){
+
+        // store score in splines
+        for (int i=0; i < keepSplines.size();i++){
+            keepSplines[i].score = keepSplineScores[i];
+        }
+
+        // sort in descending order using c++11 lambda
+        sort(keepSplines.begin(),keepSplines.end(),[](const Spline& lhs, const Spline& rhs){return lhs.score > rhs.score;});
+
+        // put sorted scores back
+        for (int i=0; i < keepSplines.size();i++){
+            keepSplineScores[i] = keepSplines[i].score;
+        }
+
+        //*** TEMPORARY ****
+        // keep only two highest scoring spline
+        keepSplines.erase(keepSplines.begin()+2,keepSplines.end());
+        keepSplineScores.erase(keepSplineScores.begin()+2,keepSplineScores.end());
+
+    }
 
     //put back
     splines.clear();
