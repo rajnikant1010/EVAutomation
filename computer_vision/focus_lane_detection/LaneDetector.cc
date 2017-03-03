@@ -27,7 +27,6 @@ namespace LaneDetector
 {
   // used for debugging
   int DEBUG_LINES = 0; // shows all debug
-  int DEBUG_CRASH = 0;
   int DEBUG_IPM = 0;
   int DEBUG_FILTERED = 0;
   int DEBUG_THRESHOLDED = 0;
@@ -54,7 +53,6 @@ namespace LaneDetector
                      unsigned char wx, unsigned char wy, FLOAT sigmax,
                      FLOAT sigmay, LineType lineType)
 {
-  if(DEBUG_CRASH) printf("Entering 'mcvFilterLines'\n");
     //define the two kernels
     //this is for 7-pixels wide
 //     FLOAT_MAT_ELEM_TYPE derivp[] = {-2.328306e-10, -6.984919e-09, -1.008157e-07, -9.313226e-07, -6.178394e-06, -3.129616e-05, -1.255888e-04, -4.085824e-04, -1.092623e-03, -2.416329e-03, -4.408169e-03, -6.530620e-03, -7.510213e-03, -5.777087e-03, -5.777087e-04, 6.932504e-03, 1.372058e-02, 1.646470e-02, 1.372058e-02, 6.932504e-03, -5.777087e-04, -5.777087e-03, -7.510213e-03, -6.530620e-03, -4.408169e-03, -2.416329e-03, -1.092623e-03, -4.085824e-04, -1.255888e-04, -3.129616e-05, -6.178394e-06, -9.313226e-07, -1.008157e-07, -6.984919e-09, -2.328306e-10};
@@ -166,7 +164,6 @@ namespace LaneDetector
 //     cvReleaseMat(&x);
 //     cvReleaseMat(&y);
 //     cvReleaseMat(&kernel);
-  if(DEBUG_CRASH) printf("Exiting 'mcvFilterLines'\n");
 }
 
 /**
@@ -1180,7 +1177,6 @@ void mcvGetVectorLocalMax(const CvMat *inVec, vector<double> &localMaxima,
  */
 FLOAT mcvGetQuantile(const CvMat *mat, FLOAT qtile)
 {
-  if(DEBUG_CRASH) printf("Entering 'mcvGetQuantile'\n");
   //make it a row vector
   CvMat rowMat;
   cvReshape(mat, &rowMat, 0, 1);
@@ -1189,7 +1185,6 @@ FLOAT mcvGetQuantile(const CvMat *mat, FLOAT qtile)
   FLOAT qval;
   qval = quantile((FLOAT*) rowMat.data.ptr, rowMat.width, qtile);
 
-   if(DEBUG_CRASH) printf("Exiting 'mcvGetQuantile'\n");
   return qval;
 }
 
@@ -1205,7 +1200,6 @@ FLOAT mcvGetQuantile(const CvMat *mat, FLOAT qtile)
  */
 void mcvThresholdLower(const CvMat *inMat, CvMat *outMat, FLOAT threshold)
 {
-if(DEBUG_CRASH) printf("Entering 'mcvThresholdLower'\n");
 #define MCV_THRESHOLD_LOWER(type) \
      for (int i=0; i<inMat->height; i++) \
         for (int j=0; j<inMat->width; j++) \
@@ -1230,7 +1224,6 @@ if(DEBUG_CRASH) printf("Entering 'mcvThresholdLower'\n");
     cerr << "Unsupported type in mcvGetVectorMax\n";
     exit(1);
   }
-  if(DEBUG_CRASH) printf("Exiting 'mcvThresholdLower'\n");
 }
 
 /** This function detects stop lines in the input image using IPM
@@ -1498,7 +1491,6 @@ void mcvGetLanes(const CvMat *inImage, const CvMat* clrImage,
                  CameraInfo *cameraInfo, LaneDetectorConf *stopLineConf,
                  LineState* state)
 {
-  if(DEBUG_CRASH) printf("Entering 'mcvGetLanes'\n");
   //input size
   CvSize inSize = cvSize(inImage->width, inImage->height);
 
@@ -1513,21 +1505,6 @@ void mcvGetLanes(const CvMat *inImage, const CvMat* clrImage,
   //state: create a new structure, and put pointer to it if it's null
   LineState newState;
   if(!state) state = &newState;
-
-//     //get the IPM size such that we have height of the stop line
-//     //is 3 pixels
-//     double ipmWidth, ipmHeight;
-//     mcvGetIPMExtent(cameraInfo, &ipmInfo);
-//     ipmHeight = 3*(ipmInfo.yLimits[1]-ipmInfo.yLimits[0]) / (stopLineConf->lineHeight/3.);
-//     ipmWidth = ipmHeight * 4/3;
-//     //put into the conf
-//     stopLineConf->ipmWidth = int(ipmWidth);
-//     stopLineConf->ipmHeight = int(ipmHeight);
-
-//     #ifdef DEBUG_GET_STOP_LINES
-//     cout << "IPM width:" << stopLineConf->ipmWidth << " IPM height:"
-// 	 << stopLineConf->ipmHeight << "\n";
-//     #endif
 
 
   //Get IPM
@@ -1546,20 +1523,8 @@ void mcvGetLanes(const CvMat *inImage, const CvMat* clrImage,
   list<CvPoint>::iterator outPixelsi;
   mcvGetIPM(image, ipm, &ipmInfo, cameraInfo, &outPixels);
 
-  //smooth the IPM image with 5x5 gaussian filter
-#warning "Check: Smoothing IPM image"
-  //cvSmooth(ipm, ipm, CV_GAUSSIAN, 3);
-  //      SHOW_MAT(ipm, "ipm");
-
-  //     //subtract mean
-  //     CvScalar mean = cvAvg(ipm);
-  //     cvSubS(ipm, mean, ipm);
-
   //keep copy
   CvMat* rawipm = cvCloneMat(ipm);
-
-  //smooth the IPM
-  //cvSmooth(ipm, ipm, CV_GAUSSIAN, 5, 5, 1, 1);
 
   //debugging
   CvMat *dbIpmImage;
@@ -1577,30 +1542,13 @@ void mcvGetLanes(const CvMat *inImage, const CvMat* clrImage,
   //stop line pixel height: 12 inches = 12*25.4 mm
   FLOAT stopLinePixelHeight = stopLineConf->lineHeight  *
       ipmInfo.yScale;
-  //kernel dimensions
-  //unsigned char wx = 2;
-  //unsigned char wy = 2;
   FLOAT sigmax = stopLinePixelWidth;
   FLOAT sigmay = stopLinePixelHeight;
-
-//     //filter in the horizontal direction
-//     CvMat * ipmt = cvCreateMat(ipm->width, ipm->height, ipm->type);
-//     cvTranspose(ipm, ipmt);
-//     mcvFilterLines(ipmt, ipmt, stopLineConf->kernelWidth,
-// 		   stopLineConf->kernelHeight, sigmax, sigmay,
-// 		   LINE_VERTICAL);
-//     //retranspose
-//     CvMat *ipm2 = cvCreateMat(ipm->height, ipm->width, ipm->type);
-//     cvTranspose(ipmt, ipm2);
-//     cvReleaseMat(&ipmt);
 
   //filter the IPM image
   mcvFilterLines(ipm, ipm, stopLineConf->kernelWidth,
                  stopLineConf->kernelHeight, sigmax, sigmay,
                  LINE_VERTICAL);
-//     mcvFilterLines(ipm, ipm, stopLineConf->kernelWidth,
-// 		   stopLineConf->kernelHeight, sigmax, sigmay,
-// 		   LINE_VERTICAL);
 
   //zero out points outside the image in IPM view
   for(outPixelsi=outPixels.begin(); outPixelsi!=outPixels.end(); outPixelsi++)
@@ -1627,25 +1575,10 @@ void mcvGetLanes(const CvMat *inImage, const CvMat* clrImage,
     SHOW_IMAGE(ipm, "Lane unthresholded filtered", 10);
   }
 
-  //take the negative to get double yellow lines
-  //cvScale(ipm, ipm, -1);
-
   CvMat *fipm = cvCloneMat(ipm);
 
-    //zero out negative values
-//     SHOW_MAT(fipm, "fipm");
 #warning "clean negative parts in filtered image"
   mcvThresholdLower(ipm, ipm, 0);
-//     mcvThresholdLower(ipm2, ipm2, 0);
-
-//     //add the two images
-//     cvAdd(ipm, ipm2, ipm);
-
-//     //clear the horizontal filtered image
-//     cvReleaseMat(&ipm2);
-
-  //fipm was here
-  //make copy of filteed ipm image
 
   vector <Line> dbIpmStopLines;
   vector<Spline> dbIpmSplines;
@@ -1668,22 +1601,11 @@ void mcvGetLanes(const CvMat *inImage, const CvMat* clrImage,
     //compute quantile: .985
     FLOAT qtileThreshold = mcvGetQuantile(subimage, stopLineConf->lowerQuantile);
     mcvThresholdLower(subimage, subimage, qtileThreshold);
-  // 	FLOAT qtileThreshold = mcvGetQuantile(ipm, stopLineConf->lowerQuantile);
-  // 	mcvThresholdLower(ipm, ipm, qtileThreshold);
 
-  //     qtileThreshold = mcvGetQuantile(ipm2, stopLineConf->lowerQuantile);
-  //     mcvThresholdLower(ipm2, ipm2, qtileThreshold);
-
-      //and fipm was here last
-  //     //make copy of filtered ipm image
-  //     CvMat *fipm = cvCloneMat(ipm);
     vector<Line> subimageLines;
     vector<Spline> subimageSplines;
     vector<float> subimageLineScores, subimageSplineScores;
 
-	//check to blank out other periferi of the image
-// 	mask = cvRect(40, 0, 80, subimage->height);
-// 	mcvSetMat(subimage, mask, 0);
     if(DEBUG_LINES || DEBUG_THRESHOLDED) {//#ifdef DEBUG_GET_STOP_LINES
 	    CvMat *dbIpmImageThresholded;
 	    dbIpmImageThresholded = cvCreateMat(ipm->height, ipm->width, ipm->type);
@@ -1699,9 +1621,7 @@ void mcvGetLanes(const CvMat *inImage, const CvMat* clrImage,
     mcvGetLines(subimage, LINE_VERTICAL, subimageLines, subimageLineScores,
 		    subimageSplines, subimageSplineScores, stopLineConf,
 		    state);
-// 	mcvGetLines(ipm, LINE_VERTICAL, *lanes, *lineScores,
-// 		    *splines, *splineScores, stopLineConf,
-// 		    state);
+
     //put back
     for (unsigned int k=0; k<subimageLines.size(); k++)
     {
@@ -1729,15 +1649,6 @@ void mcvGetLanes(const CvMat *inImage, const CvMat* clrImage,
 	    //thresholded ipm
 	    SHOW_IMAGE(dbIpmImageThresholded, str, 10);
 	    cvReleaseMat(&dbIpmImageThresholded);
-
-	    //dbIpmStopLines = *lanes;
-	    //dbIpmSplines = *splines;
-	    // 	//print out lineScores
-	    // 	cout << "LineScores:";
-	    // 	//for (int i=0; i<(int)lineScores->size(); i++)
-	    // 	for (int i=0; i<(int)lineScores->size(); i++)
-	    // 	    cout << (*lineScores)[i] << " ";
-	    // 	cout << "\n";
     }//#endif
 
     //release
@@ -1802,7 +1713,6 @@ void mcvGetLanes(const CvMat *inImage, const CvMat* clrImage,
   cvReleaseMat(&fipm);
   cvReleaseMat(&rawipm);
   //ipmStopLines.clear();
-  if(DEBUG_CRASH) printf("Exiting 'mcvGetLanes'\n");
 }
 
 
@@ -1835,14 +1745,6 @@ void mcvPostprocessLines(const CvMat* image, const CvMat* clrImage,
   //vector of splines to keep
   vector<Spline> keepSplines;
   vector<float> keepSplineScores;
-
-//     //get line extent
-//     if(lineConf->getEndPoints)
-//     {
-// 	//get line extent in IPM image
-// 	for(int i=0; i<(int)lines.size(); i++)
-// 	    mcvGetLineExtent(rawipm, lines[i], lines[i]);
-//     }
 
   //if return straight lines
 
@@ -1899,74 +1801,12 @@ void mcvPostprocessLines(const CvMat* image, const CvMat* clrImage,
         //refit spline
         Spline spline = mcvFitBezierSpline(p, lineConf->ransacSplineDegree);
 
-
         // **** investigating ipm points, especially blank space ****
         // **** at bottom of ipm transformed spline              ****
-        // Show new points vs old points
-            //get string
-//        char str[256];
-//        sprintf(str, "Old Points");
-//
-//        CvMat *oldPoints;
-//
-//        //convert image to rgb
-//        oldPoints = cvCreateMat(fipm->rows, fipm->cols, CV_32FC3);
-//        CvMat *im2 = cvCloneMat(fipm);
-//        mcvScaleMat(fipm, im2);
-//        cvCvtColor(im2, oldPoints, CV_GRAY2RGB);
-//        cvReleaseMat(&im2);
-//
-//        //show original points
-//        for(int i=0; i<points->height; i++)
-//            //input points
-//            cvCircle(oldPoints, cvPoint((int)(CV_MAT_ELEM(*points, float, i, 0)),
-//                                       (int)(CV_MAT_ELEM(*points, float, i, 1))),
-//                     1, CV_RGB(0, 1, 1), -1);
-//
-//        //show new points
-//        for(int i=0; i<p->height; i++)
-//            //input points
-//            cvCircle(oldPoints, cvPoint((int)(CV_MAT_ELEM(*p, float, i, 0)),
-//                                       (int)(CV_MAT_ELEM(*p, float, i, 1))),
-//                     1, CV_RGB(1, 1, 0), -1);
-//
-//        mcvDrawSpline(oldPoints, splines[i], CV_RGB(0, 1, 1), 1);
-//        mcvDrawSpline(oldPoints, spline, CV_RGB(1, 1, 0), 1);
-//        //show image
-//        SHOW_IMAGE(oldPoints, str, 10);
-//
-//        //Compare with color image
-//        CvMat *clr2 = cvCloneMat(clrImage);
-//
-//        //
-//
-//        vector<Spline> dbSplines;
-//        dbSplines.push_back(spline);
-//
-//        //convert to image coordinates
-//        mcvSplinesImIPM2Im(dbSplines, ipmInfo, cameraInfo, inSize);
-//        mcvSplinesImIPM2Im(splines, ipmInfo, cameraInfo, inSize);
-//
-//        // draw
-//        mcvDrawSpline(clr2, splines[i], CV_RGB(0, 255, 255), 2);
-//        mcvDrawSpline(clr2, dbSplines[0], CV_RGB(255, 255, 0), 2);
-//
-//        sprintf(str, "Spline conversion");
-//        SHOW_IMAGE(clr2, str, 10);
-//        cvWaitKey(0);
-
-        // **** investigating ipm points, especially blank space ****
-        // **** at bottom of ipm transformed spline              ****
-
 
 		//save
 #warning "Check this later: extension in IPM. Check threshold value"
  		splines[i] = spline;
-
-		//calculate the score from fipm or ipm (thresholded)
-		//float lengthRatio = 0.5; //.8
-		//float angleRatio = 0.8; //.4
-		//vector<int> jitter = mcvGetJitterVector(lineConf->splineScoreJitter);//2);
 
         float score = mcvGetSplineScore(fipm, splines[i],
                                         lineConf->splineScoreStep, //.1
@@ -1990,6 +1830,29 @@ void mcvPostprocessLines(const CvMat* image, const CvMat* clrImage,
         cvReleaseMat(&p);
       } //if
     } //for
+
+    // keep top two splines
+    if(keepSplines.size() > 2){
+
+        // store score in splines
+        for (int i=0; i < keepSplines.size();i++){
+            keepSplines[i].score = keepSplineScores[i];
+        }
+
+        // sort in descending order using c++11 lambda
+        sort(keepSplines.begin(),keepSplines.end(),[](const Spline& lhs, const Spline& rhs){return lhs.score > rhs.score;});
+
+        // put sorted scores back
+        for (int i=0; i < keepSplines.size();i++){
+            keepSplineScores[i] = keepSplines[i].score;
+        }
+
+        //*** TEMPORARY ****
+        // keep only two highest scoring spline
+        keepSplines.erase(keepSplines.begin()+2,keepSplines.end());
+        keepSplineScores.erase(keepSplineScores.begin()+2,keepSplineScores.end());
+
+    }
 
     //put back
     splines.clear();
@@ -2187,7 +2050,6 @@ void mcvGetLines(const CvMat* image, LineType lineType,
                  vector<Spline> &splines, vector<float> &splineScores,
                  LaneDetectorConf *lineConf, LineState *state)
 {
-    if(DEBUG_CRASH) printf("Entering 'mcvGetLines'\n");
 
   //initial grouping of lines
   switch(lineConf->groupingType)
@@ -2254,7 +2116,6 @@ void mcvGetLines(const CvMat* image, LineType lineType,
     mcvGetSplinesBoundingBoxes(splines, lineType,
                                cvSize(image->width, image->height),
                                state->ipmBoxes);
-    if(DEBUG_CRASH) printf("Exiting 'mcvGetLines'\n");
 }
 
 /** This function makes some checks on splines and decides
@@ -3297,7 +3158,6 @@ void mcvLineXY2RTheta(const Line &line, float &r, float &theta)
 void mcvFitRobustLine(const CvMat *points, float *lineRTheta,
                       float *lineAbc)
 {
-  if(DEBUG_CRASH) printf("Entering mcvFitRobustLine\n");
   //clone the points
   CvMat *cpoints;
 
@@ -3394,7 +3254,6 @@ void mcvFitRobustLine(const CvMat *points, float *lineRTheta,
   cvReleaseMat(&cpoints);
   cvReleaseMat(&W);
   cvReleaseMat(&V);
-  if(DEBUG_CRASH) printf("Exiting mcvFitRobustLine\n");
 }
 
 
@@ -3421,8 +3280,6 @@ void mcvFitRansacLine(const CvMat *image, int numSamples, int numIterations,
                       bool getEndPoints, LineType lineType,
                       Line *lineXY, float *lineRTheta, float *lineScore)
 {
-
-  if(DEBUG_CRASH) printf("Entering mcvFitRansacLine\n");
 
   //get the points with non-zero pixels
   CvMat *points;
@@ -3720,7 +3577,6 @@ void mcvFitRansacLine(const CvMat *image, int numSamples, int numIterations,
   cvReleaseMat(&samplePoints);
   cvReleaseMat(&randInd);
   cvReleaseMat(&pointIn);
-  if(DEBUG_CRASH) printf("Exiting mcvFitRansacLine\n");
 }
 
 
@@ -4067,7 +3923,6 @@ void mcvGetRansacLines(const CvMat *im, vector<Line> &lines,
                        vector<float> &lineScores, LaneDetectorConf *lineConf,
                        LineType lineType)
 {
-  if(DEBUG_CRASH) printf("Entering 'mcvGetRansacLines'\n");
   //check if to binarize image
   CvMat *image = cvCloneMat(im);
   if (lineConf->ransacLineBinarize)
@@ -4284,7 +4139,6 @@ void mcvGetRansacLines(const CvMat *im, vector<Line> &lines,
   newLines.clear();
   newScores.clear();
   cvReleaseMat(&image);
-  if(DEBUG_CRASH) printf("Exiting 'mcvGetRansacLines'\n");
 }
 
 /** This function sets the matrix to a value except for the mask window passed in
@@ -4295,7 +4149,6 @@ void mcvGetRansacLines(const CvMat *im, vector<Line> &lines,
  */
 void  mcvSetMat(CvMat *inMat, CvRect mask, double val)
 {
-  if(DEBUG_CRASH) printf("Entering 'mcvSetMat'\n");
 
   //get x-end points of region to work on, and work on the whole image height
   //(int)fmax(fmin(line.startPoint.x, line.endPoint.x)-xwindow, 0);
@@ -4340,7 +4193,6 @@ void  mcvSetMat(CvMat *inMat, CvRect mask, double val)
     cvGetSubRect(inMat, &maskMat, rect);
     cvSet(&maskMat, cvRealScalar(val));
   }
-  if(DEBUG_CRASH) printf("Exiting 'mcvSetMat'\n");
 }
 
 
